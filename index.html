@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paul M JDW pizza checker</title>
+    <title>Paul M JDW Pizza Checker</title>
     <style>
         body {
             display: flex;
@@ -34,49 +34,71 @@
     </style>
 </head>
 <body>
-    <h1>Pizza checker</h1>
+    <h1>Pizza Checker</h1>
     <div id="webcam-container"></div>
+    <button id="switch-camera">Switch Camera</button>
     <div id="label-container" class="label">Steady camera</div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     <script type="text/javascript">
-        const URL = "/assets/model1/";  // Change this to the path where your model is stored
+        const URL = "https://pingupenguinjdw.github.io/Pizza24/assets/model1/";
         let model, webcam, labelContainer, maxPredictions;
+        let videoDevices = [];
+        let currentDeviceIndex = 0;
 
-        // Load the image model and setup the webcam
         async function init() {
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
 
-            // load the model and metadata
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
 
-            // Setup the webcam
-            const flip = false; // don't flip as we are using the back camera
+            // Get all video devices
+            videoDevices = await navigator.mediaDevices.enumerateDevices();
+            videoDevices = videoDevices.filter(device => device.kind === 'videoinput');
+
+            // Set up the initial webcam
+            await setupWebcam(videoDevices[currentDeviceIndex].deviceId);
+
+            // Set up event listener for switching cameras
+            document.getElementById("switch-camera").addEventListener("click", switchCamera);
+        }
+
+        async function setupWebcam(deviceId) {
+            if (webcam) {
+                webcam.stop();
+            }
+
             const constraints = {
                 video: {
-                    facingMode: { exact: "environment" } // Use the back camera if available
+                    deviceId: { exact: deviceId }
                 }
             };
-            webcam = new tmImage.Webcam(400, 400, flip, constraints); // width, height, flip
-            await webcam.setup(); // request access to the webcam
-            await webcam.play();
-            window.requestAnimationFrame(loop);
 
-            // Append elements to the DOM
+            const flip = false;
+            webcam = new tmImage.Webcam(400, 400, flip, constraints);
+            await webcam.setup();
+            await webcam.play();
+
+            // Clear previous webcam container and append the new one
+            document.getElementById("webcam-container").innerHTML = '';
             document.getElementById("webcam-container").appendChild(webcam.canvas);
-            labelContainer = document.getElementById("label-container");
+
+            window.requestAnimationFrame(loop);
+        }
+
+        async function switchCamera() {
+            currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
+            await setupWebcam(videoDevices[currentDeviceIndex].deviceId);
         }
 
         async function loop() {
-            webcam.update(); // update the webcam frame
+            webcam.update();
             await predict();
             window.requestAnimationFrame(loop);
         }
 
-        // Run the webcam image through the image model
         async function predict() {
             const prediction = await model.predict(webcam.canvas);
             let topPrediction = { className: "Steady camera", probability: 0 };
