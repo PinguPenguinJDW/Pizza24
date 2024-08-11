@@ -54,13 +54,20 @@
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
 
-            // Setup the webcam
-            const flip = false; // don't flip as we are using the back camera
+            // Enumerate devices to select the back camera
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            const backCamera = videoDevices.find(device => device.label.toLowerCase().includes('back'));
+
+            // Setup the webcam with the back camera if available
             const constraints = {
                 video: {
-                    facingMode: { ideal: "environment" } // Prefer the back camera if available
+                    deviceId: backCamera ? { exact: backCamera.deviceId } : undefined,
+                    facingMode: backCamera ? undefined : { ideal: "environment" }
                 }
             };
+
+            const flip = false; // Don't flip as we are using the back camera
             webcam = new tmImage.Webcam(400, 400, flip, constraints); // width, height, flip
             await webcam.setup(); // request access to the webcam
             await webcam.play();
