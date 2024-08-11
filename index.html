@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paul M JDW pizza checker</title>
+    <title>Paul M JDW Pizza Checker</title>
     <style>
         body {
             display: flex;
@@ -34,14 +34,15 @@
     </style>
 </head>
 <body>
-    <h1>Pizza checker</h1>
+    <h1>Pizza Checker</h1>
     <div id="webcam-container"></div>
     <div id="label-container" class="label">Steady camera</div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     <script type="text/javascript">
-        const URL = "/assets/model1/";  // Change this to the path where your model is stored
+        // Use the full URL path for the model files
+        const URL = "https://pingupenguinjdw.github.io/Pizza24/assets/model1/";
         let model, webcam, labelContainer, maxPredictions;
 
         // Load the image model and setup the webcam
@@ -49,7 +50,7 @@
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
 
-            // load the model and metadata
+            // Load the model and metadata
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
 
