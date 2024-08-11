@@ -58,7 +58,7 @@
             const flip = false; // don't flip as we are using the back camera
             const constraints = {
                 video: {
-                    facingMode: { exact: "environment" } // Use the back camera if available
+                    facingMode: { ideal: "environment" } // Prefer the back camera if available
                 }
             };
             webcam = new tmImage.Webcam(400, 400, flip, constraints); // width, height, flip
